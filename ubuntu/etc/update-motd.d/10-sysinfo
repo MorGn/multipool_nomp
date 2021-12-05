@@ -1,0 +1,85 @@
+#!/usr/bin/env bash
+#
+#    10-sysinfo - generate the system information
+#    Copyright (c) 2013 Nick Charlton
+#
+#    Authors: Nick Charlton <hello@nickcharlton.net>
+#
+#    This program is free software; you can redistribute it and/or modify
+#    it under the terms of the GNU General Public License as published by
+#    the Free Software Foundation; either version 2 of the License, or
+#    (at your option) any later version.
+#
+#    This program is distributed in the hope that it will be useful,
+#    but WITHOUT ANY WARRANTY; without even the implied warranty of
+#    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#    GNU General Public License for more details.
+#
+#    You should have received a copy of the GNU General Public License along
+#    with this program; if not, write to the Free Software Foundation, Inc.,
+#    51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
+#####################################################
+# Updated by cryptopool.builders for crypto use...
+#####################################################
+
+date=`date`
+ps -aux | grep "[n]omp" > /dev/null 2>&1
+if [[ "$?" == "0" ]]; then
+        main="running"
+else
+        main="stopped"
+fi
+
+ps -aux | grep "[r]edis" > /dev/null 2>&1
+if [[ "$?" == "0" ]]; then
+        redis="running"
+else
+        redis="stopped"
+fi
+
+daemon='/home/crypto-data/wallets'
+site='/home/crypto-data/nomp/site/web'
+hint1="To view the NOMP screen type, screen -r nomp"
+hint2="To detach from the screen type, ctrl+a+d"
+divider===============================
+divider=$divider$divider
+header=" %-7s %-25s %-16s %-15s\n"
+width=50
+RED=$'\033[00;31m'
+GREEN=$'\033[00;32m'
+RESTORE=$'\033[0m'
+echo "System information as of: $date"
+echo
+/usr/bin/landscape-sysinfo
+echo
+echo "NOMP Information:"
+printf "%$width.${width}s\n" "$divider"
+if [[ $main = stopped ]]; then
+printf "$header" "NOMP:" $RED$main$RESTORE "Daemon Directory:" $daemon
+else
+printf "$header" "NOMP:" $GREEN$main$RESTORE "Daemon Directory:" $daemon
+fi
+if [[ $redis = stopped ]]; then
+  printf "$header" "Redis:" $RED$redis$RESTORE "NOMP Directory:" $site
+else
+  printf "$header" "Redis:" $GREEN$redis$RESTORE "NOMP Directory:" $site
+fi
+echo
+echo "Hint: $hint1"
+echo "Hint: $hint2"
+echo
+echo "To start|stop|restart NOMP use the following command..."
+echo "nomp start|stop|restart nomp"
+echo
+echo "To reload this MOTD just type motd..."
+echo
+echo "Donations for continued support of this script are welcomed at:"
+echo
+echo "BTC 16x9dQBFmpGRBd9dLLLCyKYh5Fqu63WwMx"
+echo "BCH qqmu7zxsg8v725eyk0f4yhz2unvh57kjfulhj8c7h6"
+echo "ETH 0xD4217C4700d5dD2f8Cd1820655308B727De60965"
+echo "LTC LhQmNUoagWbAsvh9xVBFsm2UQoqeGH3vDe"
+echo
+/usr/lib/update-notifier/update-motd-reboot-required
+/usr/lib/update-notifier/apt-check --human-readable
+echo

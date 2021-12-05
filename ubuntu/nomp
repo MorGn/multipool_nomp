@@ -1,0 +1,47 @@
+#####################################################
+# Source code from https://codereview.stackexchange.com/questions/55077/small-bash-script-to-start-and-stop-named-services
+# Updated by cryptopool.builders for crypto use...
+#####################################################
+
+cd /home/crypto-data/nomp/site
+#!/bin/sh -e
+
+nomp='screen -dmS nomp authbind node init.js'
+nompstop='screen -X -S nomp quit'
+
+startstop_service() {
+    cmd=$1
+    name=$2
+    sudo service $name $cmd
+}
+
+startstop_nomp() {
+    cmd=$1
+    case $cmd in
+        stop) $nompstop ;;
+        start) $nomp ;;
+        restart)
+            $nompstop
+            sleep 1
+            $nomp
+            ;;
+
+    esac
+}
+
+case "$1" in
+    start|stop|restart) cmd=$1 ;;
+    *)
+        shift
+        servicenames=${@-servicenames}
+        echo "usage: $0 [start|stop|restart] $servicenames"
+        exit 1
+esac
+shift
+
+for name; do
+    case "$name" in
+        nomp) startstop_nomp $cmd ;;
+        *) startstop_service $cmd $name ;;
+    esac
+done
